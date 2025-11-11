@@ -1351,6 +1351,10 @@ export const TenantProjectAgentSubAgentIdParamsSchema =
     id: resourceIdSchema,
   });
 
+export const RefQueryParamSchema = z.object({
+  ref: z.string().optional().describe('Branch name, tag name, or commit hash to query from'),
+});
+
 export const PaginationQueryParamsSchema = z
   .object({
     page: pageNumber,
@@ -1390,3 +1394,5 @@ export const ThirdPartyMCPServerResponse = z
     data: PrebuiltMCPServerSchema.nullable(),
   })
   .openapi('ThirdPartyMCPServerResponse');
+export const PaginationWithRefQueryParamsSchema =
+  PaginationQueryParamsSchema.merge(RefQueryParamSchema);
