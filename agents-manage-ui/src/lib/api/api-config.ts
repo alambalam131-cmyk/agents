@@ -47,12 +47,33 @@ function getEvalApiUrl(): string {
   return INKEEP_AGENTS_EVAL_API_URL;
 }
 
+export interface ApiRequestOptions extends RequestInit {
+  queryParams?: Record<string, string | string[] | number | boolean | undefined>;
+}
+
 async function makeApiRequestInternal<T>(
   baseUrl: string,
   endpoint: string,
-  options: RequestInit = {}
+  options: ApiRequestOptions = {}
 ): Promise<T> {
-  const url = `${baseUrl}/${endpoint}`;
+
+   // Build URL with query parameters
+   let url = `${baseUrl}/${endpoint}`;
+   if (options.queryParams) {
+     const params = new URLSearchParams();
+     Object.entries(options.queryParams).forEach(([key, value]) => {
+       if (value !== undefined && value !== null) {
+         params.append(key, String(value));
+       }
+     });
+     const queryString = params.toString();
+     
+     if (queryString) {
+       // Check if URL already has query parameters
+       const separator = url.includes('?') ? '&' : '?';
+       url += `${separator}${queryString}`;
+     }
+   }
 
   let cookieHeader: string | undefined;
   if (typeof window === 'undefined') {
@@ -187,7 +208,7 @@ async function makeApiRequestInternal<T>(
 // Management API requests (CRUD operations, configuration)
 export async function makeManagementApiRequest<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: ApiRequestOptions = {}
 ): Promise<T> {
   return makeApiRequestInternal<T>(getManageApiUrl(), endpoint, options);
 }

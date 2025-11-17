@@ -17,12 +17,14 @@ import type {
 import { ApiError } from '../types/errors';
 import type { ListResponse } from '../types/response';
 import type { TeamAgent } from '../types/team-agents';
+import type { ApiRequestOptions } from './api-config';
 import { makeManagementApiRequest } from './api-config';
 import { validateProjectId, validateTenantId } from './resource-validation';
 
 export async function fetchAgents(
   tenantId: string,
-  projectId: string
+  projectId: string,
+  options?: ApiRequestOptions
 ): Promise<ListResponse<Agent>> {
   validateTenantId(tenantId);
   validateProjectId(projectId);
@@ -52,11 +54,15 @@ export async function createAgent(
 /**
  * Fetch barebones metadata for all agents in a project to be used with team agent relations
  */
-export async function fetchTeamAgents(tenantId: string, projectId: string): Promise<TeamAgent[]> {
+export async function fetchTeamAgents(
+  tenantId: string,
+  projectId: string,
+  options?: ApiRequestOptions
+): Promise<TeamAgent[]> {
   validateTenantId(tenantId);
   validateProjectId(projectId);
 
-  const agents = await fetchAgents(tenantId, projectId);
+  const agents = await fetchAgents(tenantId, projectId, options);
   return agents.data.map((agent) => {
     return {
       id: agent.id,
@@ -72,7 +78,8 @@ export async function fetchTeamAgents(tenantId: string, projectId: string): Prom
 export async function createFullAgent(
   tenantId: string,
   projectId: string,
-  agentData: FullAgentDefinition
+  agentData: FullAgentDefinition,
+  options?: ApiRequestOptions
 ): Promise<CreateFullAgentResponse> {
   validateTenantId(tenantId);
   validateProjectId(projectId);
@@ -80,6 +87,7 @@ export async function createFullAgent(
   return makeManagementApiRequest<CreateFullAgentResponse>(
     `tenants/${tenantId}/projects/${projectId}/agent`,
     {
+      ...options,
       method: 'POST',
       body: JSON.stringify(agentData),
     }
@@ -92,7 +100,8 @@ export async function createFullAgent(
 export async function getFullAgent(
   tenantId: string,
   projectId: string,
-  agentId: string
+  agentId: string,
+  options?: ApiRequestOptions
 ): Promise<GetAgentResponse> {
   validateTenantId(tenantId);
   validateProjectId(projectId);
@@ -100,6 +109,7 @@ export async function getFullAgent(
   return makeManagementApiRequest<GetAgentResponse>(
     `tenants/${tenantId}/projects/${projectId}/agent/${agentId}`,
     {
+      ...options,
       method: 'GET',
     }
   );
@@ -112,7 +122,8 @@ export async function updateFullAgent(
   tenantId: string,
   projectId: string,
   agentId: string,
-  agentData: FullAgentDefinition
+  agentData: FullAgentDefinition,
+  options?: ApiRequestOptions
 ): Promise<UpdateAgentResponse> {
   validateTenantId(tenantId);
   validateProjectId(projectId);
@@ -120,6 +131,7 @@ export async function updateFullAgent(
   return makeManagementApiRequest<UpdateAgentResponse>(
     `tenants/${tenantId}/projects/${projectId}/agent/${agentId}`,
     {
+      ...options,
       method: 'PUT',
       body: JSON.stringify(agentData),
     }
@@ -132,12 +144,14 @@ export async function updateFullAgent(
 export async function deleteFullAgent(
   tenantId: string,
   projectId: string,
-  agentId: string
+  agentId: string,
+  options?: ApiRequestOptions
 ): Promise<void> {
   validateTenantId(tenantId);
   validateProjectId(projectId);
 
   await makeManagementApiRequest(`tenants/${tenantId}/projects/${projectId}/agent/${agentId}`, {
+    ...options,
     method: 'DELETE',
   });
 }
