@@ -8,6 +8,7 @@ import { fetchCredentialsAction } from '@/lib/actions/credentials';
 import { fetchDataComponentsAction } from '@/lib/actions/data-components';
 import { fetchExternalAgentsAction } from '@/lib/actions/external-agents';
 import { fetchToolsAction } from '@/lib/actions/tools';
+import { fetchBranchesWithAgent } from '@/lib/api/branches';
 import { createLookup } from '@/lib/utils';
 import { AgentSkeleton } from './loading';
 import { Agent } from './page.client';
@@ -15,6 +16,7 @@ import { Agent } from './page.client';
 import { getValidSearchParamsAsync } from '@/lib/utils/search-params';
 export const dynamic = 'force-dynamic';
 
+<<<<<<< HEAD
 const AgentData: FC<{
   agent: FullAgentDefinition;
   tenantId: string;
@@ -27,6 +29,25 @@ const AgentData: FC<{
       fetchCredentialsAction(tenantId, projectId),
       fetchToolsAction(tenantId, projectId),
       fetchExternalAgentsAction(tenantId, projectId),
+=======
+async function AgentPage({
+  params,
+  searchParams,
+}: PageProps<'/[tenantId]/projects/[projectId]/agents/[agentId]'>) {
+  const { agentId, tenantId, projectId } = await params;
+  const { ref } = await getValidSearchParamsAsync(searchParams);
+  const currentBranch = ref || 'main';
+
+  const [agent, dataComponents, artifactComponents, credentials, tools, externalAgents, branches] =
+    await Promise.all([
+      getFullAgentAction(tenantId, projectId, agentId, ref),
+      fetchDataComponentsAction(tenantId, projectId, ref),
+      fetchArtifactComponentsAction(tenantId, projectId, ref),
+      fetchCredentialsAction(tenantId, projectId, ref),
+      fetchToolsAction(tenantId, projectId, ref),
+      fetchExternalAgentsAction(tenantId, projectId, ref),
+      fetchBranchesWithAgent(tenantId, projectId, agentId),
+>>>>>>> 00b790826 (update run api to use wrapper)
     ]);
 
   if (
@@ -94,9 +115,21 @@ const AgentPage: FC<PageProps<'/[tenantId]/projects/[projectId]/agents/[agentId]
       // Remove inner div from the layout so the p-6 padding doesn’t apply
       className="contents"
     >
+<<<<<<< HEAD
       <Suspense fallback={<AgentSkeleton />}>
         <AgentData agent={agent.data} tenantId={tenantId} projectId={projectId} />
       </Suspense>
+=======
+      <Agent
+        agent={agent.data}
+        dataComponentLookup={dataComponentLookup}
+        artifactComponentLookup={artifactComponentLookup}
+        toolLookup={toolLookup}
+        credentialLookup={credentialLookup}
+        availableBranches={branches.data}
+        currentBranch={currentBranch}
+      />
+>>>>>>> 00b790826 (update run api to use wrapper)
     </BodyTemplate>
   );
 };

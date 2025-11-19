@@ -7,9 +7,8 @@ import {
   ContextResolver,
   type CredentialStoreRegistry,
   CredentialStuffer,
-  createMessage,
   type DataComponentApiInsert,
-  generateId,
+  executeInBranch,
   getContextConfigById,
   getCredentialReference,
   getFullAgentDefinition,
@@ -30,6 +29,7 @@ import {
   type ModelSettings,
   type Models,
   parseEmbeddedJson,
+  type ResolvedRef,
   type SubAgentStopWhen,
   TemplateEngine,
 } from '@inkeep/agents-core';
@@ -111,6 +111,7 @@ export type AgentConfig = {
   id: string;
   tenantId: string;
   projectId: string;
+  ref: ResolvedRef;
   agentId: string;
   relationId?: string;
   baseUrl: string;
@@ -147,6 +148,7 @@ export type ExternalAgentRelationConfig = {
   id: string;
   name: string;
   description: string;
+  ref: ResolvedRef;
   baseUrl: string;
   credentialReferenceId?: string | null;
   headers?: Record<string, string> | null;
@@ -156,6 +158,7 @@ export type ExternalAgentRelationConfig = {
 export type TeamAgentRelationConfig = {
   relationId: string;
   id: string;
+  ref: ResolvedRef;
   name: string;
   description: string;
   baseUrl: string;
@@ -196,9 +199,16 @@ export class Agent {
   private mcpClientCache: Map<string, McpClient> = new Map();
   private mcpConnectionLocks: Map<string, Promise<McpClient>> = new Map();
   private currentCompressor: MidGenerationCompressor | null = null;
+  private ref: ResolvedRef;
 
-  constructor(config: AgentConfig, credentialStoreRegistry?: CredentialStoreRegistry) {
+  constructor(
+    config: AgentConfig,
+    ref: ResolvedRef,
+    credentialStoreRegistry?: CredentialStoreRegistry
+  ) {
     this.artifactComponents = config.artifactComponents || [];
+
+    this.ref = ref;
 
     let processedDataComponents = config.dataComponents || [];
 
@@ -247,7 +257,8 @@ export class Agent {
         config.tenantId,
         config.projectId,
         dbClient,
-        credentialStoreRegistry
+        credentialStoreRegistry,
+        this.ref
       );
       this.credentialStuffer = new CredentialStuffer(credentialStoreRegistry, this.contextResolver);
     }
@@ -977,14 +988,22 @@ export class Agent {
 
     const credentialReferenceId = tool.credentialReferenceId;
 
-    const toolsForAgent = await getToolsForAgent(dbClient)({
-      scopes: {
-        tenantId: this.config.tenantId,
-        projectId: this.config.projectId,
-        agentId: this.config.agentId,
-        subAgentId: this.config.id,
+    const toolsForAgent = await executeInBranch(
+      {
+        dbClient: dbClient,
+        ref: this.ref,
       },
-    });
+      async (db) => {
+        return await getToolsForAgent(db)({
+          scopes: {
+            tenantId: this.config.tenantId,
+            projectId: this.config.projectId,
+            agentId: this.config.agentId,
+            subAgentId: this.config.id,
+          },
+        });
+      }
+    );
 
     const toolRelation = toolsForAgent.data.find((t) => t.toolId === tool.id);
     const agentToolRelationHeaders = toolRelation?.headers || undefined;
@@ -993,6 +1012,7 @@ export class Agent {
 
     let serverConfig: McpServerConfig;
 
+<<<<<<< HEAD
     // Check for user-scoped credential first (uses toolId + userId lookup)
     const isUserScoped = tool.credentialScope === 'user';
     const userId = this.config.userId;
@@ -1045,13 +1065,21 @@ export class Agent {
       }
     } else if (credentialReferenceId && this.credentialStuffer) {
       // Project-scoped: look up credential by credentialReferenceId
-      const credentialReference = await getCredentialReference(dbClient)({
-        scopes: {
-          tenantId: this.config.tenantId,
-          projectId: this.config.projectId,
+      const credentialReference = await executeInBranch(
+        {
+          dbClient: dbClient,
+          ref: this.ref,
         },
-        id: credentialReferenceId,
-      });
+        async (db) => {
+          return await getCredentialReference(db)({
+            scopes: {
+              tenantId: this.config.tenantId,
+              projectId: this.config.projectId,
+            },
+            id: credentialReferenceId,
+          });
+        }
+      );
 
       if (!credentialReference) {
         throw new Error(`Credential store not found: ${credentialReferenceId}`);
@@ -1248,14 +1276,22 @@ export class Agent {
     const functionTools: ToolSet = {};
 
     try {
-      const functionToolsForAgent = await getFunctionToolsForSubAgent(dbClient)({
-        scopes: {
-          tenantId: this.config.tenantId,
-          projectId: this.config.projectId,
-          agentId: this.config.agentId,
+      const functionToolsForAgent = await executeInBranch(
+        {
+          dbClient: dbClient,
+          ref: this.ref,
         },
-        subAgentId: this.config.id,
-      });
+        async (db) => {
+          return await getFunctionToolsForSubAgent(db)({
+            scopes: {
+              tenantId: this.config.tenantId,
+              projectId: this.config.projectId,
+              agentId: this.config.agentId,
+            },
+            subAgentId: this.config.id,
+          });
+        }
+      );
 
       const functionToolsData = functionToolsForAgent.data || [];
 
@@ -1276,13 +1312,21 @@ export class Agent {
           continue;
         }
 
-        const functionData = await getFunction(dbClient)({
-          functionId,
-          scopes: {
-            tenantId: this.config.tenantId || 'default',
-            projectId: this.config.projectId || 'default',
+        const functionData = await executeInBranch(
+          {
+            dbClient: dbClient,
+            ref: this.ref,
           },
-        });
+          async (db) => {
+            return await getFunction(db)({
+              functionId,
+              scopes: {
+                tenantId: this.config.tenantId || 'default',
+                projectId: this.config.projectId || 'default',
+              },
+            });
+          }
+        );
         if (!functionData) {
           logger.warn(
             { functionId, functionToolId: functionToolDef.id },
@@ -1395,14 +1439,23 @@ export class Agent {
         return null;
       }
 
-      const contextConfig = await getContextConfigById(dbClient)({
-        scopes: {
-          tenantId: this.config.tenantId,
-          projectId: this.config.projectId,
-          agentId: this.config.agentId,
+      const contextConfigId = this.config.contextConfigId;
+      const contextConfig = await executeInBranch(
+        {
+          dbClient: dbClient,
+          ref: this.ref,
         },
-        id: this.config.contextConfigId,
-      });
+        async (db) => {
+          return await getContextConfigById(db)({
+            scopes: {
+              tenantId: this.config.tenantId,
+              projectId: this.config.projectId,
+              agentId: this.config.agentId,
+            },
+            id: contextConfigId,
+          });
+        }
+      );
       if (!contextConfig) {
         logger.warn({ contextConfigId: this.config.contextConfigId }, 'Context config not found');
         return null;
@@ -1455,13 +1508,21 @@ export class Agent {
    */
   private async getPrompt(): Promise<string | undefined> {
     try {
-      const agentDefinition = await getFullAgentDefinition(dbClient)({
-        scopes: {
-          tenantId: this.config.tenantId,
-          projectId: this.config.projectId,
-          agentId: this.config.agentId,
+      const agentDefinition = await executeInBranch(
+        {
+          dbClient: dbClient,
+          ref: this.ref,
         },
-      });
+        async (db) => {
+          return await getFullAgentDefinition(db)({
+            scopes: {
+              tenantId: this.config.tenantId,
+              projectId: this.config.projectId,
+              agentId: this.config.agentId,
+            },
+          });
+        }
+      );
 
       return agentDefinition?.prompt || undefined;
     } catch (error) {
@@ -1481,14 +1542,21 @@ export class Agent {
    */
   private async hasAgentArtifactComponents(): Promise<boolean> {
     try {
-      const agentDefinition = await getFullAgentDefinition(dbClient)({
-        scopes: {
-          tenantId: this.config.tenantId,
-          projectId: this.config.projectId,
-          agentId: this.config.agentId,
+      const agentDefinition = await executeInBranch(
+        {
+          dbClient: dbClient,
+          ref: this.ref,
         },
-      });
-
+        async (db) => {
+          return await getFullAgentDefinition(db)({
+            scopes: {
+              tenantId: this.config.tenantId,
+              projectId: this.config.projectId,
+              agentId: this.config.agentId,
+            },
+          });
+        }
+      );
       if (!agentDefinition) {
         return false;
       }
@@ -1553,19 +1621,35 @@ export class Agent {
       }
     }
 
-    const referenceTaskIds: string[] = await listTaskIdsByContextId(dbClient)({
-      contextId: this.conversationId || '',
-    });
+    const referenceTaskIds: string[] = await executeInBranch(
+      {
+        dbClient: dbClient,
+        ref: this.ref,
+      },
+      async (db) => {
+        return await listTaskIdsByContextId(db)({
+          contextId: this.conversationId || '',
+        });
+      }
+    );
 
     const referenceArtifacts: Artifact[] = [];
     for (const taskId of referenceTaskIds) {
-      const artifacts = await getLedgerArtifacts(dbClient)({
-        scopes: {
-          tenantId: this.config.tenantId,
-          projectId: this.config.projectId,
+      const artifacts = await executeInBranch(
+        {
+          dbClient: dbClient,
+          ref: this.ref,
         },
-        taskId: taskId,
-      });
+        async (db) => {
+          return await getLedgerArtifacts(db)({
+            scopes: {
+              tenantId: this.config.tenantId,
+              projectId: this.config.projectId,
+            },
+            taskId: taskId,
+          });
+        }
+      );
       referenceArtifacts.push(...artifacts);
     }
 
@@ -1660,6 +1744,7 @@ export class Agent {
       projectId: this.config.projectId,
       conversationId: runtimeContext?.contextId || '',
       historyConfig,
+      ref: this.ref,
     });
 
     const componentDataComponents = excludeDataComponents ? [] : this.config.dataComponents || [];
@@ -2161,13 +2246,21 @@ ${output}`;
   // Check if any agents in the agent have artifact components
   private async agentHasArtifactComponents(): Promise<boolean> {
     try {
-      return await agentHasArtifactComponents(dbClient)({
-        scopes: {
-          tenantId: this.config.tenantId,
-          projectId: this.config.projectId,
-          agentId: this.config.agentId,
+      return await executeInBranch(
+        {
+          dbClient: dbClient,
+          ref: this.ref,
         },
-      });
+        async (db) => {
+          return await agentHasArtifactComponents(db)({
+            scopes: {
+              tenantId: this.config.tenantId,
+              projectId: this.config.projectId,
+              agentId: this.config.agentId,
+            },
+          });
+        }
+      );
     } catch (error) {
       logger.error(
         { error, agentId: this.config.agentId },
@@ -2295,6 +2388,7 @@ ${output}`;
                 currentMessage: userMessage,
                 options: historyConfig,
                 filters,
+                ref: this.ref,
               });
             } else if (historyConfig.mode === 'scoped') {
               conversationHistory = await getFormattedConversationHistory({
@@ -2309,6 +2403,7 @@ ${output}`;
                   delegationId: this.delegationId,
                   isDelegated: this.isDelegatedAgent,
                 },
+                ref: this.ref,
               });
             }
           }
@@ -2590,6 +2685,7 @@ Now please provide your answer to my original question using this context.`,
               streamHelper,
               this.config.tenantId,
               contextId,
+              this.ref,
               artifactParserOptions
             );
 
@@ -3062,6 +3158,7 @@ ${output}${structureHintsFormatted}`;
                   streamHelper,
                   this.config.tenantId,
                   contextId,
+                  this.ref,
                   artifactParserOptions
                 );
 
@@ -3158,7 +3255,7 @@ ${output}${structureHintsFormatted}`;
 
           if (!formattedContent) {
             const session = toolSessionManager.getSession(sessionId);
-            const responseFormatter = new ResponseFormatter(this.config.tenantId, {
+            const responseFormatter = new ResponseFormatter(this.config.tenantId, this.ref, {
               sessionId,
               taskId: session?.taskId,
               projectId: session?.projectId,
