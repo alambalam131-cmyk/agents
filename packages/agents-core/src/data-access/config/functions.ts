@@ -1,15 +1,15 @@
 import { and, count, desc, eq } from 'drizzle-orm';
-import type { DatabaseClient } from '../db/client';
-import { functions } from '../db/schema';
-import type { FunctionApiInsert } from '../types/entities';
-import type { PaginationConfig, ProjectScopeConfig } from '../types/utility';
-import { autoDetectDependencies } from '../utils/detectDependencies';
+import type { AgentsManageDatabaseClient } from '../../db/config/config-client';
+import { functions } from '../../db/config/config-schema';
+import type { FunctionApiInsert } from '../../types/entities';
+import type { PaginationConfig, ProjectScopeConfig } from '../../types/utility';
+import { autoDetectDependencies } from '../../utils/detectDependencies';
 
 /**
  * Create or update a function (project-scoped)
  */
 export const upsertFunction =
-  (db: DatabaseClient) =>
+  (db: AgentsManageDatabaseClient) =>
   async (params: { data: FunctionApiInsert; scopes: ProjectScopeConfig }): Promise<void> => {
     const { data, scopes } = params;
     const { tenantId, projectId } = scopes;
@@ -66,7 +66,7 @@ export const upsertFunction =
  * Get a function by ID (project-scoped)
  */
 export const getFunction =
-  (db: DatabaseClient) =>
+  (db: AgentsManageDatabaseClient) =>
   async (params: {
     functionId: string;
     scopes: ProjectScopeConfig;
@@ -93,7 +93,7 @@ export const getFunction =
  * List all functions for a project
  */
 export const listFunctions =
-  (db: DatabaseClient) =>
+  (db: AgentsManageDatabaseClient) =>
   async (params: { scopes: ProjectScopeConfig }): Promise<FunctionApiInsert[]> => {
     const { scopes } = params;
     const { tenantId, projectId } = scopes;
@@ -110,7 +110,7 @@ export const listFunctions =
  * List all functions for a project with pagination
  */
 export const listFunctionsPaginated =
-  (db: DatabaseClient) =>
+  (db: AgentsManageDatabaseClient) =>
   async (params: { scopes: ProjectScopeConfig; pagination?: PaginationConfig }) => {
     const { scopes, pagination } = params;
     const { tenantId, projectId } = scopes;
@@ -144,7 +144,7 @@ export const listFunctionsPaginated =
  * Delete a function (project-scoped)
  */
 export const deleteFunction =
-  (db: DatabaseClient) =>
+  (db: AgentsManageDatabaseClient) =>
   async (params: { functionId: string; scopes: ProjectScopeConfig }): Promise<void> => {
     const { functionId, scopes } = params;
     const { tenantId, projectId } = scopes;
