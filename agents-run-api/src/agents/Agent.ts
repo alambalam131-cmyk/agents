@@ -2978,7 +2978,10 @@ ${output}${structureHintsFormatted}`;
 
               if (shouldStreamPhase2) {
                 const phase2Messages: any[] = [
-                  { role: 'system', content: await this.buildPhase2SystemPrompt(runtimeContext) },
+                  {
+                    role: 'system',
+                    content: await this.buildPhase2SystemPrompt(runtimeContext),
+                  },
                 ];
 
                 if (conversationHistory.trim() !== '') {
