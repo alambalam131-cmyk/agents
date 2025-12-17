@@ -7,7 +7,8 @@ export default defineConfig({
 
   entry: [
     'src/index.ts',
-    'src/db/schema.ts',
+    'src/db/manage/manage-schema.ts',
+    'src/db/runtime/runtime-schema.ts',
     'src/types/index.ts',
     'src/validation/index.ts',
     'src/client-exports.ts',
@@ -19,7 +20,8 @@ export default defineConfig({
     'src/auth/auth-validation-schemas.ts',
     'src/auth/permissions.ts',
     'src/credential-stores/index.ts',
-    'src/db/test-client.ts',
+    'src/db/manage/test-manage-client.ts',
+    'src/db/runtime/test-runtime-client.ts',
   ],
   external: ['keytar', 'zod', '@hono/zod-openapi', 'drizzle-zod'],
 });
