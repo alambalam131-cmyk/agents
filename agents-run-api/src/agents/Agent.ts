@@ -246,10 +246,7 @@ export class Agent {
     this.credentialStoreRegistry = credentialStoreRegistry;
 
     if (credentialStoreRegistry) {
-      this.contextResolver = new ContextResolver(
-        executionContext,
-        credentialStoreRegistry,
-      );
+      this.contextResolver = new ContextResolver(executionContext, credentialStoreRegistry);
       this.credentialStuffer = new CredentialStuffer(credentialStoreRegistry, this.contextResolver);
     }
   }
@@ -1234,7 +1231,9 @@ export class Agent {
     const functionTools: ToolSet = {};
     const project = this.executionContext.project;
     try {
-      const functionToolsForAgent = await getFunctionToolsForSubAgent({ baseUrl: env.INKEEP_AGENTS_MANAGE_API_URL })({
+      const functionToolsForAgent = await getFunctionToolsForSubAgent({
+        baseUrl: env.INKEEP_AGENTS_MANAGE_API_URL,
+      })({
         scopes: {
           tenantId: this.config.tenantId,
           projectId: this.config.projectId,
@@ -1392,7 +1391,7 @@ export class Agent {
         agentId: this.config.agentId,
         createdAt: contextConfig.createdAt || '',
         updatedAt: contextConfig.updatedAt || '',
-      }
+      };
       if (!contextConfig) {
         logger.warn({ contextConfigId: this.config.contextConfigId }, 'Context config not found');
         return null;
@@ -1447,7 +1446,6 @@ export class Agent {
     const project = this.executionContext.project;
     const agentDefinition = project.agents[this.config.agentId];
     try {
-
       return agentDefinition?.prompt || undefined;
     } catch (error) {
       logger.warn(
@@ -2147,7 +2145,9 @@ ${output}`;
       if (!subAgents) {
         return false;
       }
-      return Object.values(subAgents).some((subAgent) => subAgent.artifactComponents?.length ?? 0 > 0);
+      return Object.values(subAgents).some(
+        (subAgent) => subAgent.artifactComponents?.length ?? 0 > 0
+      );
     } catch (error) {
       logger.error(
         { error, agentId: this.config.agentId },

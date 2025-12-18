@@ -935,13 +935,12 @@ export const CanUseItemSchema = z
   })
   .openapi('CanUseItem');
 
-  export const canRelateToInternalSubAgentSchema = z
+export const canRelateToInternalSubAgentSchema = z
   .object({
     subAgentId: z.string(),
     subAgentSubAgentRelationId: z.string(),
   })
   .openapi('CanRelateToInternalSubAgent');
-
 
 // INSERT schemas - relation ID is optional (will be assigned on creation)
 export const canDelegateToExternalAgentInsertSchema = z
@@ -1148,7 +1147,6 @@ export const FullAgentSubAgentSelectSchemaWithRelationIds = FullAgentSubAgentSel
     .nullable(),
 }).openapi('FullAgentSubAgentSelectWithRelationIds');
 
-
 export const AgentWithinContextOfProjectSelectSchema = AgentApiSelectSchema.extend({
   subAgents: z.record(z.string(), FullAgentSubAgentSelectSchema),
   tools: z.record(z.string(), ToolApiSelectSchema).nullable(),
@@ -1163,9 +1161,10 @@ export const AgentWithinContextOfProjectSelectSchema = AgentApiSelectSchema.exte
   prompt: z.string().nullable(),
 }).openapi('AgentWithinContextOfProjectSelect');
 
-export const AgentWithinContextOfProjectSelectSchemaWithRelationIds = AgentWithinContextOfProjectSelectSchema.extend({
-  subAgents: z.record(z.string(), FullAgentSubAgentSelectSchemaWithRelationIds),
-}).openapi('AgentWithinContextOfProjectSelectWithRelationIds');
+export const AgentWithinContextOfProjectSelectSchemaWithRelationIds =
+  AgentWithinContextOfProjectSelectSchema.extend({
+    subAgents: z.record(z.string(), FullAgentSubAgentSelectSchemaWithRelationIds),
+  }).openapi('AgentWithinContextOfProjectSelectWithRelationIds');
 
 export const FullProjectSelectSchema = ProjectApiSelectSchema.extend({
   agents: z.record(z.string(), AgentWithinContextOfProjectSelectSchema),
