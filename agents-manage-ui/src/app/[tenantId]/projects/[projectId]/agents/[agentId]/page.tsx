@@ -14,50 +14,18 @@ import { Agent } from './page.client';
 
 export const dynamic = 'force-dynamic';
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 7a6780422 (restore agents-manage-ui)
 const AgentData: FC<{
   agent: FullAgentDefinition;
   tenantId: string;
   projectId: string;
 }> = async ({ agent, tenantId, projectId }) => {
   const [dataComponents, artifactComponents, credentials, tools, externalAgents] =
-<<<<<<< HEAD
     await Promise.all([
       fetchDataComponentsAction(tenantId, projectId),
       fetchArtifactComponentsAction(tenantId, projectId),
       fetchCredentialsAction(tenantId, projectId),
       fetchToolsAction(tenantId, projectId),
       fetchExternalAgentsAction(tenantId, projectId),
-=======
-async function AgentPage({
-  params,
-  searchParams,
-}: PageProps<'/[tenantId]/projects/[projectId]/agents/[agentId]'>) {
-  const { agentId, tenantId, projectId } = await params;
-  const { ref } = await getValidSearchParamsAsync(searchParams);
-  const currentBranch = ref || 'main';
-
-  const [agent, dataComponents, artifactComponents, credentials, tools, externalAgents, branches] =
-    await Promise.all([
-      getFullAgentAction(tenantId, projectId, agentId, ref),
-      fetchDataComponentsAction(tenantId, projectId, ref),
-      fetchArtifactComponentsAction(tenantId, projectId, ref),
-      fetchCredentialsAction(tenantId, projectId, ref),
-      fetchToolsAction(tenantId, projectId, ref),
-      fetchExternalAgentsAction(tenantId, projectId, ref),
-      fetchBranchesWithAgent(tenantId, projectId, agentId),
->>>>>>> 00b790826 (update run api to use wrapper)
-=======
-    await Promise.all([
-      fetchDataComponentsAction(tenantId, projectId),
-      fetchArtifactComponentsAction(tenantId, projectId),
-      fetchCredentialsAction(tenantId, projectId),
-      fetchToolsAction(tenantId, projectId),
-      fetchExternalAgentsAction(tenantId, projectId),
->>>>>>> 7a6780422 (restore agents-manage-ui)
     ]);
 
   if (
@@ -125,27 +93,9 @@ const AgentPage: FC<PageProps<'/[tenantId]/projects/[projectId]/agents/[agentId]
       // Remove inner div from the layout so the p-6 padding doesn’t apply
       className="contents"
     >
-<<<<<<< HEAD
-<<<<<<< HEAD
       <Suspense fallback={<AgentSkeleton />}>
         <AgentData agent={agent.data} tenantId={tenantId} projectId={projectId} />
       </Suspense>
-=======
-      <Agent
-        agent={agent.data}
-        dataComponentLookup={dataComponentLookup}
-        artifactComponentLookup={artifactComponentLookup}
-        toolLookup={toolLookup}
-        credentialLookup={credentialLookup}
-        availableBranches={branches.data}
-        currentBranch={currentBranch}
-      />
->>>>>>> 00b790826 (update run api to use wrapper)
-=======
-      <Suspense fallback={<AgentSkeleton />}>
-        <AgentData agent={agent.data} tenantId={tenantId} projectId={projectId} />
-      </Suspense>
->>>>>>> 7a6780422 (restore agents-manage-ui)
     </BodyTemplate>
   );
 };
