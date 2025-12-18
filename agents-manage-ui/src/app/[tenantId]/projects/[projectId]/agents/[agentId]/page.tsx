@@ -8,21 +8,23 @@ import { fetchCredentialsAction } from '@/lib/actions/credentials';
 import { fetchDataComponentsAction } from '@/lib/actions/data-components';
 import { fetchExternalAgentsAction } from '@/lib/actions/external-agents';
 import { fetchToolsAction } from '@/lib/actions/tools';
-import { fetchBranchesWithAgent } from '@/lib/api/branches';
 import { createLookup } from '@/lib/utils';
 import { AgentSkeleton } from './loading';
 import { Agent } from './page.client';
 
-import { getValidSearchParamsAsync } from '@/lib/utils/search-params';
 export const dynamic = 'force-dynamic';
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 7a6780422 (restore agents-manage-ui)
 const AgentData: FC<{
   agent: FullAgentDefinition;
   tenantId: string;
   projectId: string;
 }> = async ({ agent, tenantId, projectId }) => {
   const [dataComponents, artifactComponents, credentials, tools, externalAgents] =
+<<<<<<< HEAD
     await Promise.all([
       fetchDataComponentsAction(tenantId, projectId),
       fetchArtifactComponentsAction(tenantId, projectId),
@@ -48,6 +50,14 @@ async function AgentPage({
       fetchExternalAgentsAction(tenantId, projectId, ref),
       fetchBranchesWithAgent(tenantId, projectId, agentId),
 >>>>>>> 00b790826 (update run api to use wrapper)
+=======
+    await Promise.all([
+      fetchDataComponentsAction(tenantId, projectId),
+      fetchArtifactComponentsAction(tenantId, projectId),
+      fetchCredentialsAction(tenantId, projectId),
+      fetchToolsAction(tenantId, projectId),
+      fetchExternalAgentsAction(tenantId, projectId),
+>>>>>>> 7a6780422 (restore agents-manage-ui)
     ]);
 
   if (
@@ -116,6 +126,7 @@ const AgentPage: FC<PageProps<'/[tenantId]/projects/[projectId]/agents/[agentId]
       className="contents"
     >
 <<<<<<< HEAD
+<<<<<<< HEAD
       <Suspense fallback={<AgentSkeleton />}>
         <AgentData agent={agent.data} tenantId={tenantId} projectId={projectId} />
       </Suspense>
@@ -130,6 +141,11 @@ const AgentPage: FC<PageProps<'/[tenantId]/projects/[projectId]/agents/[agentId]
         currentBranch={currentBranch}
       />
 >>>>>>> 00b790826 (update run api to use wrapper)
+=======
+      <Suspense fallback={<AgentSkeleton />}>
+        <AgentData agent={agent.data} tenantId={tenantId} projectId={projectId} />
+      </Suspense>
+>>>>>>> 7a6780422 (restore agents-manage-ui)
     </BodyTemplate>
   );
 };
