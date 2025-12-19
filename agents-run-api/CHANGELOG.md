@@ -1,5 +1,13 @@
 # @inkeep/agents-run-api
 
+## 0.40.0
+
+### Patch Changes
+
+- be0131e: user info for spans
+- Updated dependencies [be0131e]
+  - @inkeep/agents-core@0.40.0
+
 ## 0.39.5
 
 ### Patch Changes

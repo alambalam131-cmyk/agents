@@ -1,5 +1,26 @@
 # @inkeep/agents-manage-ui
 
+## 0.40.0
+
+### Minor Changes
+
+- 811b6e2: Deduplicate Data Fetching with `@tanstack/react-query`
+- 90c4cfb: remove unused variables/functions
+- 50ed255: remove unused types
+
+### Patch Changes
+
+- be0131e: user info for spans
+- 07f77ab: Remove unused exports using Knip automation tool
+- 1ef2557: dashboard: do not overflow main content container
+- 5b32e12: Fix container size
+- d27e015: fix double breadcrumbs on `/projects` error page
+- 970a7bd: update Next.js to 16.1.0, use Turbopack for build
+- Updated dependencies [be0131e]
+  - @inkeep/agents-run-api@0.40.0
+  - @inkeep/agents-manage-api@0.40.0
+  - @inkeep/agents-core@0.40.0
+
 ## 0.39.5
 
 ### Patch Changes

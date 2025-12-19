@@ -1,5 +1,11 @@
 # @inkeep/agents-core
 
+## 0.40.0
+
+### Patch Changes
+
+- be0131e: user info for spans
+
 ## 0.39.5
 
 ### Patch Changes

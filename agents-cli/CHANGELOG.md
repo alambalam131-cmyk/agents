@@ -1,5 +1,23 @@
 # @inkeep/agents-cli
 
+## 0.40.0
+
+### Patch Changes
+
+- be0131e: user info for spans
+- Updated dependencies [be0131e]
+- Updated dependencies [07f77ab]
+- Updated dependencies [811b6e2]
+- Updated dependencies [90c4cfb]
+- Updated dependencies [1ef2557]
+- Updated dependencies [5b32e12]
+- Updated dependencies [d27e015]
+- Updated dependencies [970a7bd]
+- Updated dependencies [50ed255]
+  - @inkeep/agents-manage-ui@0.40.0
+  - @inkeep/agents-core@0.40.0
+  - @inkeep/agents-sdk@0.40.0
+
 ## 0.39.5
 
 ### Patch Changes
